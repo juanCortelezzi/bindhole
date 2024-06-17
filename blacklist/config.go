@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 )
@@ -79,8 +80,28 @@ func filterMapInvalidBlacklists(rawBlacklists []rawBlacklist) []ParsedBlacklist 
 	return blacklists
 }
 
-func GetBlacklistsFromConfig() ([]ParsedBlacklist, error) {
-	rawBlacklists, err := loadConfigFile("./blacklists.toml")
+func GetBlacklistConfigPath() (string, error) {
+	configHome, found := os.LookupEnv("XDG_CONFIG_HOME")
+	if !found {
+		configHome = os.ExpandEnv("$HOME")
+	}
+
+	if configHome == "" {
+		return "", fmt.Errorf("%w: could not find config home", ErrLoadingConfig)
+	}
+
+	if strings.HasSuffix(configHome, "/") {
+		configHome = strings.TrimSuffix(configHome, "/")
+	}
+
+	configPath := fmt.Sprintf("%s/bindhole/blacklists.toml", configHome)
+
+	return configPath, nil
+
+}
+
+func GetBlacklistsFromConfig(configPath string) ([]ParsedBlacklist, error) {
+	rawBlacklists, err := loadConfigFile(configPath)
 	if err != nil {
 		return nil, err
 	}

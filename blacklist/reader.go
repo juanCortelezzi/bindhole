@@ -101,10 +101,6 @@ readloop:
 			continue
 		}
 
-		// if bytes.HasPrefix(line, []byte(simpleBlacklistComment)) {
-		// 	continue
-		// }
-
 		line, _, _ = bytes.Cut(line, []byte(" "))
 
 		for _, localhost := range localhosts {
