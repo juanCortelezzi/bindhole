@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 )
 
 const (
@@ -53,8 +54,14 @@ func (r *SimpleParsedReader) Read(p []byte) (int, error) {
 			continue
 		}
 
-		n := copy(p, line)
-		if n < len(line) {
+		domain := normalizeDomain(string(line))
+		if domain == "" {
+			log.Printf("invalid domain: %s", line)
+			continue
+		}
+
+		n := copy(p, domain)
+		if n < len(domain) {
 			return 0, ErrBufferTooSmall
 		}
 
@@ -109,8 +116,14 @@ readloop:
 			}
 		}
 
-		n := copy(p, line)
-		if n < len(line) {
+		domain := normalizeDomain(string(line))
+		if domain == "" {
+			log.Printf("invalid domain: %s", line)
+			continue
+		}
+
+		n := copy(p, domain)
+		if n < len(domain) {
 			return 0, ErrBufferTooSmall
 		}
 
