@@ -56,7 +56,7 @@ func (r *SimpleParsedReader) Read(p []byte) (int, error) {
 
 		domain := normalizeDomain(string(line))
 		if domain == "" {
-			log.Printf("invalid domain: %s", line)
+			log.Printf("Invalid domain: %s", line)
 			continue
 		}
 
@@ -118,7 +118,7 @@ readloop:
 
 		domain := normalizeDomain(string(line))
 		if domain == "" {
-			log.Printf("invalid domain: %s", line)
+			log.Printf("Invalid domain: %s", line)
 			continue
 		}
 

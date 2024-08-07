@@ -13,28 +13,39 @@ import (
 )
 
 type Args struct {
-	config string
-	output string
+	configPath     string
+	outputFilePath string
+	server         string
+	port           int
 }
 
 func NewArgs() (*Args, error) {
 	args := Args{}
 
-	flagSet := flag.NewFlagSet("config", flag.ExitOnError)
-	flagSet.StringVar(&args.config, "config", "", "Path to the configuration file")
-	flagSet.StringVar(&args.config, "c", "", "Path to the configuration file")
-	flagSet.StringVar(&args.output, "output", "./bindhole.zone", "Path to the output file")
-	flagSet.StringVar(&args.output, "o", "./bindhole.zone", "Path to the output file")
+	flagSet := flag.NewFlagSet("programConfiguration", flag.ExitOnError)
+
+	flagSet.StringVar(&args.configPath, "config", "", "Path to the configuration file")
+	flagSet.StringVar(&args.configPath, "c", "", "Path to the configuration file")
+
+	flagSet.StringVar(&args.outputFilePath, "output", "./blockme.list", "Path to the output file")
+	flagSet.StringVar(&args.outputFilePath, "o", "./blockme.list", "Path to the output file")
+
+	flagSet.StringVar(&args.server, "server", "127.0.0.1", "DNS server to use")
+	flagSet.StringVar(&args.server, "s", "127.0.0.1", "DNS server to use")
+
+	flagSet.IntVar(&args.port, "port", 53, "DNS server port to use")
+	flagSet.IntVar(&args.port, "p", 53, "DNS server port to use")
+
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
 		return nil, err
 	}
 
-	if args.config == "" {
+	if args.configPath == "" {
 		configPath, err := blacklist.GetBlacklistConfigPath()
 		if err != nil {
 			return nil, fmt.Errorf("could not get default config path: %v", err)
 		}
-		args.config = configPath
+		args.configPath = configPath
 	}
 
 	return &args, nil
@@ -47,21 +58,33 @@ func main() {
 		return
 	}
 
-	blacklists, err := blacklist.GetBlacklistsFromConfig(args.config)
+	log.Printf("Reading config file: '%s'\n", args.configPath)
+
+	blacklists, err := blacklist.GetBlacklistsFromConfig(args.configPath)
 	if err != nil {
 		log.Fatalf("Could not get blacklists from config: %v", err)
 	}
 
-	zoneFile, err := blacklist.NewRPZFile(args.output)
+	log.Printf("Opening output file: '%s'\n", args.outputFilePath)
+
+	zoneFile, err := blacklist.NewRPZFile(
+		args.outputFilePath,
+		args.server,
+		args.port,
+	)
 	if err != nil {
-		log.Fatalf("Could not create zone file: %v", err)
+		log.Fatalf("Could not create list file: %v", err)
 	}
 
 	defer zoneFile.Close()
 
+	log.Printf("Writing configuration for '%s:%d'\n", args.server, args.port)
+
 	for _, list := range blacklists {
+		log.Printf("Gathering data from '%s' using '%s' parser\n", list.Url.String(), list.Parser)
 		handleBlacklist(list, zoneFile)
 	}
+	log.Printf("Finished writing blacklists to '%s'\n", args.outputFilePath)
 }
 
 func handleBlacklist(list blacklist.ParsedBlacklist, zoneFile *blacklist.RPZFile) {
