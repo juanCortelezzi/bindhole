@@ -14,11 +14,10 @@ from alpine:3
 
 copy --from=builder /app/main .
 
-ENV BINDHOLE_RPZ_FILE=bindhole.zone
+env RPZ_CONFIG_FILE=blacklists.toml
+env RPZ_OUTPUT_FILE=latest_block.list
 
 volume /etc/bindhole/output
 volume /etc/bindhole/config
 
-entrypoint ./main \
-  -config /etc/bindhole/config/blacklists.toml \
-  -output /etc/bindhole/output/$BINDHOLE_RPZ_FILE
+entrypoint ["./main", "-config", "/etc/bindhole/config/$RPZ_CONFIG_FILE", "-output", "/etc/bindhole/output/$RPZ_OUTPUT_FILE"]

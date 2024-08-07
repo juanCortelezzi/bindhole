@@ -91,7 +91,6 @@ func TestIPSkipperParsedReader(t *testing.T) {
 		parsedHosts = append(parsedHosts, host)
 	}
 
-	log.Printf("parsedHosts: %#v\n", parsedHosts)
 	if len(parsedHosts) != len(expectedHosts) {
 		t.Fatalf("expected %d hosts, got %d", len(expectedHosts), len(parsedHosts))
 	}

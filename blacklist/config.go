@@ -60,12 +60,12 @@ func filterMapInvalidBlacklists(rawBlacklists []rawBlacklist) []ParsedBlacklist 
 	for _, rawBlacklist := range rawBlacklists {
 		url, err := url.ParseRequestURI(rawBlacklist.Url)
 		if err != nil {
-			log.Printf("error parsing url: %v, skipping.", err)
+			log.Printf("Error parsing url: %v, skipping.", err)
 			continue
 		}
 
 		if rawBlacklist.Parser != ParserSimple && rawBlacklist.Parser != ParserIpSkipper {
-			log.Printf("parser '%s' not supported, skipping.", rawBlacklist.Parser)
+			log.Printf("Parser '%s' not supported, skipping.", rawBlacklist.Parser)
 			continue
 		}
 
